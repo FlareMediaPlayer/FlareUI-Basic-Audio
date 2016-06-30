@@ -47,7 +47,14 @@ class FlareDomElement {
         this.element.innerHTML = content;
     }
     
-
+    renderStyles(styles){
+        for(var key in styles){
+            this.styles[key] = styles[key];
+            this.element.style.setProperty(key, styles[key]);
+        }
+    }
+    
+    
 }
 
 class FlareUI {
@@ -66,15 +73,6 @@ class FlareUI {
             element.style.setProperty(style, styles[style]);
         }
 
-    }
-
-    applyStyles() {
-        //Go through each element in the player
-        for (var playerElement in this.playerElements) {
-            for (var elementClass in playerElement.classes) {
-                playerElement.element.style.setProperty(style);
-            }
-        }
     }
 
     parseTarget() {
@@ -106,6 +104,12 @@ class FlareUI {
     update(){
         
     }
+    
+    updatePlayProgress(percent){
+
+        this.playerElements.playProgress.renderStyles({"transform" : "scaleX(" + percent + ")"});
+    }
+    
 }
 
 class BasicAudioPlayer extends FlareUI {
@@ -121,6 +125,7 @@ class BasicAudioPlayer extends FlareUI {
         this.boot(); // Here we create our player
         this.renderElements(); //Applies all custom settings to the elements
         this.appendToDom(); //add our finished player to the DOM
+        this.updatePlayProgress(0.7);
         console.log("ui loaded");
         
         
@@ -172,14 +177,20 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.progressContainer.setStyles({
             height: '100%',
             width : "100%",
-            display: "table-cell"
+            display: "table-cell",
+            position : "relative"
 
         });
         
         this.playerElements.playProgress = new FlareDomElement("div", "play-progress");
         this.playerElements.playProgress.setStyles({
             'transform-origin': '0 0 ',
-            'background-color': 'rgba(0,0,255,0.4)'
+            'background-color': 'rgba(0,0,255,0.4)',
+            position : "absolute",
+            top : "0",
+            bottom : "0",
+            left : "0",
+            right : "0"
 
         });
 
