@@ -1,0 +1,9 @@
+{
+    "name": "flare-ui-basic-audio-player",
+    "version": "0.0.0",
+    "keywords": ["util", "functional", "server", "client", "browser"],
+    "author": "Brian Parra",
+    "contributors": [],
+    "dependencies": {},
+    "main": "src/flare-ui-basic-audio-player.js"
+}
