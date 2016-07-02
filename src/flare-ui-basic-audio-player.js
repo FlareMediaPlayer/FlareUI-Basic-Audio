@@ -58,14 +58,14 @@ class FlareDomElement {
         }
     }
     
+
     
 }
 
 class FlareUI {
 
-    constructor(mediaPlayer) {
+    constructor() {
         
-        this.mediaPlayer = mediaPlayer;
         this.baseClass = "flare";
 
         this.playerElements = {};
@@ -96,7 +96,7 @@ class FlareUI {
 
     appendToDom() {
         //Allways append the container 
-        this.domLocation.appendChild(this.playerElements.container.element);
+        this.target.appendChild(this.playerElements.container.element);
     }
 
     renderElements() {
@@ -157,7 +157,7 @@ class BasicAudioPlayer extends FlareUI {
         
         
         this.target = target; // The desired location to append the player to
-        this.parseTarget(); //parse the desired location to append to
+        //this.parseTarget(); //parse the desired location to append to
         this.boot(); // Here we create our player
         this.renderElements(); //Applies all custom settings to the elements
         this.appendToDom(); //add our finished player to the DOM
@@ -168,12 +168,13 @@ class BasicAudioPlayer extends FlareUI {
     }
 
     boot() {
-
+        console.log(this.target);
         this.playerElements.container = new FlareDomElement("div", "container");
         this.playerElements.container.setStyles({
             'background-color': 'black',
             height: '40px',
-            color : "white"
+            color : "white",
+            display : "block"
         });
 
         this.playerElements.controls = new FlareDomElement("div", "controls");
