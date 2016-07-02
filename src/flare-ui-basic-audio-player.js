@@ -9,6 +9,10 @@ class FlareDomElement {
      * @returns {nm$_flare-ui-basic-audio-player.FlareDomElement}
      */
     constructor(tagName, mainClassName) {
+        
+        this.state = "0"; //0 ready, 1 buffering, 2 playing, -1 error
+        
+        
         this.tagName = tagName;
         this.mainClassName = mainClassName;
         this.baseClassName = "flare";
@@ -113,6 +117,31 @@ class FlareUI {
         
     }
     
+    setState(state){
+        
+        this.state = state;
+        switch(this.state){
+            case -1:
+                //display error
+                this.playerElements.playButton.setContent("&#8709;");
+            case 0 :
+                //display ready state
+                this.playerElements.playButton.setContent("&#9658;");
+                break;
+            case 1: 
+                //display loading state
+                this.playerElements.playButton.setContent("&#9862;");
+                break;
+            case 2:
+                //display play state
+                this.playerElements.playButton.setContent("&#9612;&#9612;");
+                break;
+            default:
+                //display error on all others
+        }
+        
+    }
+    
     registerPlayButtonCallback(callback){
         this.playButtonCallback = callback;
     }
@@ -132,7 +161,7 @@ class BasicAudioPlayer extends FlareUI {
         this.boot(); // Here we create our player
         this.renderElements(); //Applies all custom settings to the elements
         this.appendToDom(); //add our finished player to the DOM
-        this.updatePlayProgress(0.7);
+        this.updatePlayProgress(0);
         console.log("ui loaded");
         
         
@@ -166,8 +195,6 @@ class BasicAudioPlayer extends FlareUI {
             cursor : "pointer"
 
         });
-
-
         this.playerElements.playButton.setContent("&#9658;");
 
         this.playerElements.timeIndicator = new FlareDomElement("div", "time-indicator");
