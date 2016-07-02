@@ -59,8 +59,9 @@ class FlareDomElement {
 
 class FlareUI {
 
-    constructor() {
-
+    constructor(mediaPlayer) {
+        
+        this.mediaPlayer = mediaPlayer;
         this.baseClass = "flare";
 
         this.playerElements = {};
@@ -101,13 +102,19 @@ class FlareUI {
         }
     }
     
-    update(){
-        
-    }
-    
     updatePlayProgress(percent){
 
         this.playerElements.playProgress.renderStyles({"transform" : "scaleX(" + percent + ")"});
+    }
+    
+    handlePlayClick(e){
+        
+        this.playButtonCallback.call();
+        
+    }
+    
+    registerPlayButtonCallback(callback){
+        this.playButtonCallback = callback;
     }
     
 }
@@ -155,7 +162,8 @@ class BasicAudioPlayer extends FlareUI {
             display: "table-cell",
             "vertical-align" : "middle",
             padding : "0 10px",
-            "background-color" : this.playButtonColor
+            "background-color" : this.playButtonColor,
+            cursor : "pointer"
 
         });
 
@@ -199,8 +207,14 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.controls.addChild(this.playerElements.progressContainer);
         this.playerElements.progressContainer.addChild(this.playerElements.playProgress);
         this.playerElements.controls.addChild(this.playerElements.timeIndicator);
+        
+        
+        //Finally Bind the controllers
+        this.playerElements.playButton.element.onclick = this.handlePlayClick.bind(this);
 
     }
+    
+ 
 
 }
 
