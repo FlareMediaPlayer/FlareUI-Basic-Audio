@@ -111,6 +111,11 @@ class FlareUI {
         this.playerElements.playProgress.renderStyles({"transform" : "scaleX(" + percent + ")"});
     }
     
+    updateTimeDisplay(time){
+        var formattedTime = this.formatTime(time);
+        this.playerElements.timeIndicator.setContent(formattedTime + " / " + this.formattedTimelineDuration);
+    }
+    
     handlePlayClick(e){
         
         this.playButtonCallback.call();
@@ -146,6 +151,36 @@ class FlareUI {
         this.playButtonCallback = callback;
     }
     
+    /**
+     * Set the total duration of the timeline in seconds
+     * @returns {undefined}
+     */
+    setTimelineDuration(duration){
+        this.timelineDuration = duration;
+    }
+    
+    /**
+     * Utility function to format time in seconds into a string
+     * @function formatTimeFromSeconds
+     * @param {number} timeInSeconds video time in seconds
+     * @return {string} formated time
+     */
+    formatTime(timeInSeconds) {
+        var totalSeconds = Math.ceil(timeInSeconds);
+        var min = Math.floor(totalSeconds / 60);
+        var seconds = totalSeconds % 60;
+        var formattedTime = this.formatDigits(min) + ":" + this.formatDigits(seconds);
+
+        return formattedTime;
+    }
+    
+    formatDigits (time) {
+        if (time > 9)
+            return time
+        else
+            return "0" + time;
+    }
+    
 }
 
 class BasicAudioPlayer extends FlareUI {
@@ -166,9 +201,16 @@ class BasicAudioPlayer extends FlareUI {
         
         
     }
-
+    
+    initializeTimeline(duration){
+        
+        this.timelineDuration = duration;
+        this.formattedTimelineDuration = this.formatTime(this.timelineDuration);
+        this.playerElements.timeIndicator.setContent("0:00 / " + this.formattedTimelineDuration);
+    }
+    
     boot() {
-        console.log(this.target);
+
         this.playerElements.container = new FlareDomElement("div", "container");
         this.playerElements.container.setStyles({
             'background-color': 'black',
@@ -199,7 +241,7 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.playButton.setContent("&#9658;");
 
         this.playerElements.timeIndicator = new FlareDomElement("div", "time-indicator");
-        this.playerElements.timeIndicator.setContent("0:00 / 0:01");
+        //this.playerElements.timeIndicator.setContent("0:00 / 0:01");
         this.playerElements.timeIndicator.setStyles({
             height: '100%',
             display: "table-cell",
