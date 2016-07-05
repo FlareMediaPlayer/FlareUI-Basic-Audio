@@ -68,46 +68,64 @@ class FlareDomElement {
     
 }
 
-class FlareDomSliderElement extends FlareDomElement{
-    
+class FlareDomSliderElement extends FlareDomElement {
+
     constructor(tagName, mainClassName) {
-        super(tagName, mainClassName);
         
+        super(tagName, mainClassName);
+
+        //These need to be declared first before binding the handler functions (they count as new functions)
+        this.mouseMoveHandler;
+        this.mouseUpHandler;
+        
+        this.clickX = null;
+        this.clickY = null;
+     
 
         this.element.onmousedown = this.handleMouseDown.bind(this);
-        //this.element.onmouseup = this.handleMouseUp.bind(this);
+
+        //
+        this.mouseMoveHandler = this.handleMouseMove.bind(this);
+        this.mouseUpHandler = this.handleMouseUp.bind(this);
+
     }
     
     handleMouseDown(e){
-
-        //document.mouseover
         
-        //document.onmousemove = this.handleMouseMove.bind(this);
+        this.clickX = e.x;
+        this.clickY = e.y;
+        this.elementHeight = this.element.offsetHeight;
+        this.boundingRect = this.element.getBoundingClientRect();
+        this.elementHeight = this.boundingRect.bottom - this.boundingRect.top;
+        this.percentValue = Math.min(1,Math.max(0,(this.clickY - this.boundingRect.top) / this.elementHeight));//(this.clickY - this.boundingRect.top) / this.elementHeight, 1);
+        console.log(this.percentValue);
         
-        this._handleMouseMove;
-        this._handleMouseUp;
-        
-        this._handleMouseMove = this.handleMouseMove.bind(this);
-        this._handleMouseUp = this.handleMouseUp.bind(this);
-  
-
-        document.addEventListener("mousemove", this._handleMouseMove);
-        document.addEventListener("mouseup", this._handleMouseUp);
+        document.addEventListener("mousemove", this.mouseMoveHandler);
+        document.addEventListener("mouseup", this.mouseUpHandler);
         
         e.stopPropagation;
         return false;
+        
     }
     
     handleMouseMove(e , handler){
-        console.log(e);
+
+        var currentY = e.y;
+        
+        //Calculate delta y for a vertical slider
+        this.percentValue = Math.min(1,Math.max(0,(currentY - this.boundingRect.top) / this.elementHeight));
+        console.log(this.percentValue);        
+        
     }
     
     handleMouseUp(e , handler){
+        
         console.log("mouseup");
-        document.removeEventListener("mousemove", this._handleMouseMove);
-        document.removeEventListener("mouseup", this._handleMouseUp);
+        document.removeEventListener("mousemove", this.mouseMoveHandler);
+        document.removeEventListener("mouseup", this.mouseUpHandler);
         e.stopPropagation;
         return false;
+        
     }
     
 }
