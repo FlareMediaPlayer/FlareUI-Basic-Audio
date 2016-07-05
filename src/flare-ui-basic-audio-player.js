@@ -40,11 +40,19 @@ class FlareDomElement {
         for (var key in this.styles) {
             this.element.style.setProperty(key, this.styles[key]);
         }
+        
+        for (var key in this.attributes) {
+            this.element.setAttribute(key, this.attributes[key]);
+        }
 
     }
 
     setStyles(styles) {
-        this.styles = styles
+        this.styles = styles;
+    }
+    
+    setAttributes(attributes) {
+        this.attributes = attributes;
     }
 
     setContent(content) {
@@ -58,7 +66,49 @@ class FlareDomElement {
         }
     }
     
+}
 
+class FlareDomSliderElement extends FlareDomElement{
+    
+    constructor(tagName, mainClassName) {
+        super(tagName, mainClassName);
+        
+
+        this.element.onmousedown = this.handleMouseDown.bind(this);
+        //this.element.onmouseup = this.handleMouseUp.bind(this);
+    }
+    
+    handleMouseDown(e){
+
+        //document.mouseover
+        
+        //document.onmousemove = this.handleMouseMove.bind(this);
+        
+        this._handleMouseMove;
+        this._handleMouseUp;
+        
+        this._handleMouseMove = this.handleMouseMove.bind(this);
+        this._handleMouseUp = this.handleMouseUp.bind(this);
+  
+
+        document.addEventListener("mousemove", this._handleMouseMove);
+        document.addEventListener("mouseup", this._handleMouseUp);
+        
+        e.stopPropagation;
+        return false;
+    }
+    
+    handleMouseMove(e , handler){
+        console.log(e);
+    }
+    
+    handleMouseUp(e , handler){
+        console.log("mouseup");
+        document.removeEventListener("mousemove", this._handleMouseMove);
+        document.removeEventListener("mouseup", this._handleMouseUp);
+        e.stopPropagation;
+        return false;
+    }
     
 }
 
@@ -119,6 +169,12 @@ class FlareUI {
     handlePlayClick(e){
         
         this.playButtonCallback.call();
+        
+    }
+    
+    handleDrag(e){
+        
+        console.log(e);
         
     }
     
@@ -239,6 +295,46 @@ class BasicAudioPlayer extends FlareUI {
 
         });
         this.playerElements.playButton.setContent("&#9658;");
+        
+        this.playerElements.volumeContainer = new FlareDomElement("div", "volume-container");
+        this.playerElements.volumeContainer.setStyles({
+            height: '100%',
+            display: "table-cell",
+            "vertical-align" : "middle",
+            "background-color" : "green",
+            cursor : "pointer"
+
+        });
+        this.playerElements.volumeContainer.setAttributes({
+            
+
+        });
+        
+        
+        
+        this.playerElements.volumeSliderOuter = new FlareDomSliderElement("div", "volume-slider-outer");
+        this.playerElements.volumeSliderOuter.setStyles({
+            height: '100%',
+            width: '50px',
+            "background-color": "green",
+            cursor: "pointer",
+            "user-drag": "element",
+            "-moz-user-select": "none",
+            "-webkit-user-drag": "element",
+            "-webkit-user-select": "none"
+
+        });
+        
+        this.playerElements.volumeSliderOuter.setAttributes({
+            //role : "slider",
+            "aria-valuemin" : 0,
+            "aria-valuemax" : 100,
+            "aria-valuenow" : 90,
+            "touch-action" : "none",
+"role" : "slider"
+        });
+        
+        
 
         this.playerElements.timeIndicator = new FlareDomElement("div", "time-indicator");
         //this.playerElements.timeIndicator.setContent("0:00 / 0:01");
@@ -277,11 +373,12 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.controls.addChild(this.playerElements.progressContainer);
         this.playerElements.progressContainer.addChild(this.playerElements.playProgress);
         this.playerElements.controls.addChild(this.playerElements.timeIndicator);
-        
+        this.playerElements.controls.addChild(this.playerElements.volumeContainer);
+        this.playerElements.volumeContainer.addChild(this.playerElements.volumeSliderOuter);
         
         //Finally Bind the controllers
         this.playerElements.playButton.element.onclick = this.handlePlayClick.bind(this);
-
+        //this.playerElements.volumeSliderOuter.element.ondrag = this.handleDrag.bind(this);
     }
     
  
