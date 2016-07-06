@@ -20,7 +20,7 @@ class FlareDomElement {
         this.classes = {};
         this.attributes = {};
         this.styles = {};
-        
+
     }
 
     addClass() {
@@ -93,6 +93,7 @@ class FlareDomSliderElement extends FlareDomElement {
 
     handleMouseDown(e) {
 
+
         this.clickX = e.x;
         this.clickY = e.y;
         this.elementHeight = this.element.offsetHeight;
@@ -105,13 +106,13 @@ class FlareDomSliderElement extends FlareDomElement {
 
         document.addEventListener("mousemove", this.mouseMoveHandler);
         document.addEventListener("mouseup", this.mouseUpHandler);
-
-        e.stopPropagation;
+        console.log("binding");
+        e.stopPropagation();
         return false;
 
     }
 
-    handleMouseMove(e, handler) {
+    handleMouseMove(e) {
 
         var currentY = e.y;
 
@@ -124,7 +125,7 @@ class FlareDomSliderElement extends FlareDomElement {
 
     }
 
-    handleMouseUp(e, handler) {
+    handleMouseUp(e) {
 
         console.log("mouseup");
         document.removeEventListener("mousemove", this.mouseMoveHandler);
@@ -135,15 +136,18 @@ class FlareDomSliderElement extends FlareDomElement {
     }
 
     addValueChangedListener(listener) {
-        console.log(listener);
-        this.valueChangedListeners.listener = listener;
+
+        this.valueChangedListeners[listener] = listener;
+
+
     }
 
     dispatchValueChangedEvent(valueData) {
 
         for (var listener in this.valueChangedListeners) {
-            this.valueChangedListeners.listener.call(this, valueData);
+            this.valueChangedListeners[listener].call(this, valueData);
         }
+
     }
 
 }
@@ -376,7 +380,7 @@ class BasicAudioPlayer extends FlareUI {
             position: "absolute"
         });
 
-        this.playerElements.volumeSliderDisplayContainer = new FlareDomSliderElement("div", "volume-slider-display-container");
+        this.playerElements.volumeSliderDisplayContainer = new FlareDomElement("div", "volume-slider-display-container");
         this.playerElements.volumeSliderDisplayContainer.setStyles({
             height: '100%',
             width: '100%',
@@ -384,7 +388,7 @@ class BasicAudioPlayer extends FlareUI {
             display: "table"
         });
 
-        this.playerElements.volumeSliderDisplay = new FlareDomSliderElement("div", "volume-slider-display");
+        this.playerElements.volumeSliderDisplay = new FlareDomElement("div", "volume-slider-display");
         this.playerElements.volumeSliderDisplay.setStyles({
             height: '100%',
             "text-align": "center",
@@ -447,13 +451,14 @@ class BasicAudioPlayer extends FlareUI {
     }
 
     handleVolumeChanged(valueData) {
+
         this.playerElements.volumeSliderInner.renderStyles({
             transform: "scaleY(" + valueData.percent + ")"
         });
     }
-    
-    addVolumeChangedListener(listener){
-        //this.playerElements.volumeSliderOuter.addValueChangedListener(listener);
+
+    addVolumeChangedListener(listener) {
+        this.playerElements.volumeSliderOuter.addValueChangedListener(listener);
     }
 
 }
