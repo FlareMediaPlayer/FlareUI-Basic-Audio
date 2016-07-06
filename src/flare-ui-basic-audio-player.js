@@ -336,6 +336,15 @@ class BasicAudioPlayer extends FlareUI {
         });
         this.playerElements.playButton.setContent("&#9658;");
 
+        this.playerElements.descriptionContainer = new FlareDomElement("div", "description-container");
+        this.playerElements.descriptionContainer.setStyles({
+            position : "absolute",
+            "z-index" : 1,
+            width : "100%",
+            height : "100%"
+           
+        });
+
         this.playerElements.volumeContainer = new FlareDomElement("div", "volume-container");
         this.playerElements.volumeContainer.setStyles({
             height: '100%',
@@ -398,20 +407,25 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.volumeSliderDisplay.setContent("	&#128266;");
 
 
-        this.playerElements.timeIndicator = new FlareDomElement("div", "time-indicator");
+        this.playerElements.timeIndicatorContainer = new FlareDomElement("div", "time-indicator-container");
         //this.playerElements.timeIndicator.setContent("0:00 / 0:01");
+        this.playerElements.timeIndicatorContainer.setStyles({
+            height: '100%',
+            display: "table",
+            padding: "0 10px",
+            float: "right"
+        });
+
+        this.playerElements.timeIndicator = new FlareDomElement("div", "time-indicator");
         this.playerElements.timeIndicator.setStyles({
             height: '100%',
             display: "table-cell",
-            padding: "0 10px",
             "vertical-align": "middle"
-
-
         });
 
         this.playerElements.progressContainer = new FlareDomElement("div", "progress-container");
         this.playerElements.progressContainer.setStyles({
-            height: '100%',
+            height: '1px',
             width: "100%",
             display: "table-cell",
             position: "relative"
@@ -433,8 +447,10 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.container.addChild(this.playerElements.controls);
         this.playerElements.controls.addChild(this.playerElements.playButton);
         this.playerElements.controls.addChild(this.playerElements.progressContainer);
+        this.playerElements.progressContainer.addChild(this.playerElements.descriptionContainer);
+        this.playerElements.descriptionContainer.addChild(this.playerElements.timeIndicatorContainer);
+        this.playerElements.timeIndicatorContainer.addChild(this.playerElements.timeIndicator);
         this.playerElements.progressContainer.addChild(this.playerElements.playProgress);
-        this.playerElements.controls.addChild(this.playerElements.timeIndicator);
         this.playerElements.controls.addChild(this.playerElements.volumeContainer);
         this.playerElements.volumeContainer.addChild(this.playerElements.volumeSliderOuter);
         this.playerElements.volumeSliderOuter.addChild(this.playerElements.volumeSliderInner);
