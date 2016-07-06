@@ -20,6 +20,7 @@ class FlareDomElement {
         this.classes = {};
         this.attributes = {};
         this.styles = {};
+        
     }
 
     addClass() {
