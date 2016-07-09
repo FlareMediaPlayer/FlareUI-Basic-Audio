@@ -152,6 +152,87 @@ class FlareDomSliderElement extends FlareDomElement {
 
 }
 
+class FlareHorizontalSlider extends FlareDomElement {
+    
+    constructor(tagName, mainClassName) {
+
+        super(tagName, mainClassName);
+        this.valueChangedListeners = {};
+        //These need to be declared first before binding the handler functions (they count as new functions)
+        this.mouseMoveHandler;
+        this.mouseUpHandler;
+
+        this.clickX = null;
+
+
+        this.element.onmousedown = this.handleMouseDown.bind(this);
+
+        //
+        this.mouseMoveHandler = this.handleMouseMove.bind(this);
+        this.mouseUpHandler = this.handleMouseUp.bind(this);
+
+    } 
+
+    handleMouseDown(e) {
+
+
+        this.clickX = e.x;
+        this.clickY = e.y;
+        this.elementWidth = this.element.offsetWidth;
+        this.boundingRect = this.element.getBoundingClientRect();
+        //this.elementHeight = this.boundingRect.bottom - this.boundingRect.top;
+        this.percentValue = Math.min(1, Math.max(0, (this.clickX - this.boundingRect.left) / this.elementWidth));//(this.clickY - this.boundingRect.top) / this.elementHeight, 1);
+        this.dispatchValueChangedEvent({
+            percent: this.percentValue
+        });
+
+        document.addEventListener("mousemove", this.mouseMoveHandler);
+        document.addEventListener("mouseup", this.mouseUpHandler);
+        console.log("binding");
+        e.stopPropagation();
+        return false;
+
+    }
+
+    handleMouseMove(e) {
+
+        var currentX = e.x;
+
+        //Calculate delta y for a vertical slider
+        this.percentValue = Math.min(1, Math.max(0, (currentX - this.boundingRect.left) / this.elementWidth));
+        this.dispatchValueChangedEvent({
+            percent: this.percentValue
+        });
+
+
+    }
+
+    handleMouseUp(e) {
+
+        console.log("mouseup");
+        document.removeEventListener("mousemove", this.mouseMoveHandler);
+        document.removeEventListener("mouseup", this.mouseUpHandler);
+        e.stopPropagation;
+        return false;
+
+    }
+
+    addValueChangedListener(listener) {
+
+        this.valueChangedListeners[listener] = listener;
+
+
+    }
+
+    dispatchValueChangedEvent(valueData) {
+
+        for (var listener in this.valueChangedListeners) {
+            this.valueChangedListeners[listener].call(this, valueData);
+        }
+
+    }
+}
+
 class FlareUI {
 
     constructor() {
@@ -262,7 +343,7 @@ class FlareUI {
      * @return {string} formated time
      */
     formatTime(timeInSeconds) {
-        var totalSeconds = Math.ceil(timeInSeconds);
+        var totalSeconds = Math.floor(timeInSeconds);
         var min = Math.floor(totalSeconds / 60);
         var seconds = totalSeconds % 60;
         var formattedTime = this.formatDigits(min) + ":" + this.formatDigits(seconds);
@@ -329,20 +410,34 @@ class BasicAudioPlayer extends FlareUI {
             width: '30px',
             display: "table-cell",
             "vertical-align": "middle",
-            padding: "0 10px",
             "background-color": this.playButtonColor,
             cursor: "pointer"
 
         });
-        this.playerElements.playButton.setContent("&#9658;");
+
+        this.playerElements.playButtonInner = new FlareDomElement("div", "play-button-inner");
+        this.playerElements.playButtonInner.setStyles({
+            height: '100%',
+            width: '40px'
+
+        });
+
+        this.playerElements.playIcon = new FlareDomElement("svg", "play-button-icon");
+        this.playerElements.playIcon.setStyles({
+            height: '40px',
+            width: '40px',
+
+        });
+
+        //this.playerElements.playButton.setContent("&#9658;");
 
         this.playerElements.descriptionContainer = new FlareDomElement("div", "description-container");
         this.playerElements.descriptionContainer.setStyles({
-            position : "absolute",
-            "z-index" : 1,
-            width : "100%",
-            height : "100%"
-           
+            position: "absolute",
+            "z-index": 1,
+            width: "100%",
+            height: "100%"
+
         });
 
         this.playerElements.volumeContainer = new FlareDomElement("div", "volume-container");
@@ -423,7 +518,7 @@ class BasicAudioPlayer extends FlareUI {
             "vertical-align": "middle"
         });
 
-        this.playerElements.progressContainer = new FlareDomElement("div", "progress-container");
+        this.playerElements.progressContainer = new FlareHorizontalSlider("div", "progress-container");
         this.playerElements.progressContainer.setStyles({
             height: '1px',
             width: "100%",
@@ -446,6 +541,8 @@ class BasicAudioPlayer extends FlareUI {
 
         this.playerElements.container.addChild(this.playerElements.controls);
         this.playerElements.controls.addChild(this.playerElements.playButton);
+        this.playerElements.playButton.addChild(this.playerElements.playButtonInner);
+        this.playerElements.playButtonInner.addChild(this.playerElements.playIcon);
         this.playerElements.controls.addChild(this.playerElements.progressContainer);
         this.playerElements.progressContainer.addChild(this.playerElements.descriptionContainer);
         this.playerElements.descriptionContainer.addChild(this.playerElements.timeIndicatorContainer);
@@ -464,6 +561,10 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.volumeSliderOuter.addValueChangedListener(function (valueData) {
             _this.handleVolumeChanged(valueData);
         });
+        
+        this.playerElements.progressContainer.addValueChangedListener(function (valueData) {
+            _this.handleTimelineSeek(valueData);
+        });
     }
 
     handleVolumeChanged(valueData) {
@@ -475,6 +576,10 @@ class BasicAudioPlayer extends FlareUI {
 
     addVolumeChangedListener(listener) {
         this.playerElements.volumeSliderOuter.addValueChangedListener(listener);
+    }
+    
+    handleTimelineSeek(valueData){
+        console.log(valueData);
     }
 
 }
