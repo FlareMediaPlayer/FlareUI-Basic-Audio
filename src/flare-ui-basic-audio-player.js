@@ -335,7 +335,10 @@ class FlareUI {
     }
 
     updatePlayProgress(percent) {
-
+        var invert = 1/percent;
+        if (invert === 0)
+            invert = 1;
+        this.playerElements.playHandle.renderStyles({"transform": "scaleX(" + invert + ")"});
         this.playerElements.playProgress.renderStyles({"transform": "scaleX(" + percent + ")"});
     }
 
@@ -580,7 +583,8 @@ class BasicAudioPlayer extends FlareUI {
             height: '1px',
             width: "100%",
             display: "table-cell",
-            position: "relative"
+            position: "relative",
+            cursor: "pointer"
 
         });
 
@@ -596,6 +600,15 @@ class BasicAudioPlayer extends FlareUI {
 
         });
 
+        this.playerElements.playHandle = new FlareDomElement("div", "play-handle");
+        this.playerElements.playHandle.setStyles({
+            width : "2px",
+            "background-color" : "white",
+            height: "100%",
+            "float" : "right"
+
+        });
+
         this.playerElements.container.addChild(this.playerElements.controls);
         this.playerElements.controls.addChild(this.playerElements.playButton);
         this.playerElements.playButton.addChild(this.playerElements.playButtonInner);
@@ -605,6 +618,7 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.descriptionContainer.addChild(this.playerElements.timeIndicatorContainer);
         this.playerElements.timeIndicatorContainer.addChild(this.playerElements.timeIndicator);
         this.playerElements.progressContainer.addChild(this.playerElements.playProgress);
+        this.playerElements.playProgress.addChild(this.playerElements.playHandle);
         this.playerElements.controls.addChild(this.playerElements.volumeContainer);
         this.playerElements.volumeContainer.addChild(this.playerElements.volumeSliderOuter);
         this.playerElements.volumeSliderOuter.addChild(this.playerElements.volumeSliderInner);
@@ -640,11 +654,9 @@ class BasicAudioPlayer extends FlareUI {
     handleTimelineSeek(valueData){
         
         this.updateTimeDisplay(valueData.numerical);
-        this.updatePlayProgress(valueData.quantizedPercent);
+        this.updatePlayProgress(valueData.percent);
         if (valueData.type === "mouseup") {
-            this.dispatchSeekEvent({
-                position: valueData.numerical
-            });
+            this.dispatchSeekEvent(valueData);
         }
         
     
