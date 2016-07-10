@@ -61,10 +61,21 @@ class FlareDomElement {
     }
 
     renderStyles(styles) {
+        
         for (var key in styles) {
             this.styles[key] = styles[key];
             this.element.style.setProperty(key, styles[key]);
         }
+        
+    }
+    
+    renderAttributes(attributes){
+        
+       for (var key in attributes) {
+            this.attributes[key] = attributes[key];
+            this.element.setAttribute(key, attributes[key]);
+        } 
+        
     }
 
 }
@@ -172,6 +183,21 @@ class FlareHorizontalSlider extends FlareDomElement {
         this.mouseUpHandler = this.handleMouseUp.bind(this);
 
     } 
+    
+    setRange(minValue, maxValue){
+        
+        this.minValue = minValue;
+        this.maxValue = maxValue;
+        this.range = maxValue-minValue;
+        
+        this.renderAttributes({
+            "aria-valuemin" : 0,
+            "aria-valuemax" : maxValue
+        });
+        
+    }
+    
+    
 
     handleMouseDown(e) {
 
@@ -182,8 +208,15 @@ class FlareHorizontalSlider extends FlareDomElement {
         this.boundingRect = this.element.getBoundingClientRect();
         //this.elementHeight = this.boundingRect.bottom - this.boundingRect.top;
         this.percentValue = Math.min(1, Math.max(0, (this.clickX - this.boundingRect.left) / this.elementWidth));//(this.clickY - this.boundingRect.top) / this.elementHeight, 1);
+        this.numericalValue = Math.floor(this.percentValue * this.range);
+        this.quantizedPercent = this.numericalValue/this.range;
+        this.renderAttributes({
+            "aria-valuenow" : this.numericalValue,
+        });
         this.dispatchValueChangedEvent({
-            percent: this.percentValue
+            percent: this.percentValue,
+            numerical : this.numericalValue,
+            quantizedPercent : this.quantizedPercent
         });
 
         document.addEventListener("mousemove", this.mouseMoveHandler);
@@ -200,8 +233,15 @@ class FlareHorizontalSlider extends FlareDomElement {
 
         //Calculate delta y for a vertical slider
         this.percentValue = Math.min(1, Math.max(0, (currentX - this.boundingRect.left) / this.elementWidth));
+        this.numericalValue = Math.floor(this.percentValue * this.range);
+        this.quantizedPercent = this.numericalValue/this.range;
         this.dispatchValueChangedEvent({
-            percent: this.percentValue
+            percent: this.percentValue,
+            numerical : this.numericalValue,
+            quantizedPercent : this.quantizedPercent
+        });
+        this.renderAttributes({
+            "aria-valuenow" : this.numericalValue,
         });
 
 
@@ -213,6 +253,23 @@ class FlareHorizontalSlider extends FlareDomElement {
         document.removeEventListener("mousemove", this.mouseMoveHandler);
         document.removeEventListener("mouseup", this.mouseUpHandler);
         e.stopPropagation;
+
+        var currentX = e.x;
+
+        //Calculate delta y for a vertical slider
+        this.percentValue = Math.min(1, Math.max(0, (currentX - this.boundingRect.left) / this.elementWidth));
+        this.numericalValue = Math.floor(this.percentValue * this.range);
+        this.quantizedPercent = this.numericalValue / this.range;
+        this.dispatchValueChangedEvent({
+            percent: this.percentValue,
+            numerical: this.numericalValue,
+            quantizedPercent: this.quantizedPercent,
+            type : "mouseup"
+        });
+        this.renderAttributes({
+            "aria-valuenow": this.numericalValue,
+        });
+        
         return false;
 
     }
@@ -363,30 +420,32 @@ class FlareUI {
 class BasicAudioPlayer extends FlareUI {
 
     constructor(target) {
+        
         super();
-
+        this.seekListeners = {};
         this.playButtonColor = "red";
 
 
         this.target = target; // The desired location to append the player to
         //this.parseTarget(); //parse the desired location to append to
-        this.boot(); // Here we create our player
+        this.initUI(); // Here we create our player
         this.renderElements(); //Applies all custom settings to the elements
         this.appendToDom(); //add our finished player to the DOM
         this.updatePlayProgress(0);
         console.log("ui loaded");
 
-
     }
 
-    initializeTimeline(duration) {
+    loadMetaData(metaData) {
 
-        this.timelineDuration = duration;
+        this.timelineDuration = metaData.duration;
         this.formattedTimelineDuration = this.formatTime(this.timelineDuration);
         this.playerElements.timeIndicator.setContent("0:00 / " + this.formattedTimelineDuration);
+        this.playerElements.progressContainer.setRange(0, Math.floor(metaData.duration));
+
     }
 
-    boot() {
+    initUI() {
 
         this.playerElements.container = new FlareDomElement("div", "container");
         this.playerElements.container.setStyles({
@@ -452,8 +511,6 @@ class BasicAudioPlayer extends FlareUI {
         this.playerElements.volumeContainer.setAttributes({
 
         });
-
-
 
         this.playerElements.volumeSliderOuter = new FlareDomSliderElement("div", "volume-slider-outer");
         this.playerElements.volumeSliderOuter.setStyles({
@@ -575,11 +632,36 @@ class BasicAudioPlayer extends FlareUI {
     }
 
     addVolumeChangedListener(listener) {
+
         this.playerElements.volumeSliderOuter.addValueChangedListener(listener);
+
     }
     
     handleTimelineSeek(valueData){
-        console.log(valueData);
+        
+        this.updateTimeDisplay(valueData.numerical);
+        this.updatePlayProgress(valueData.quantizedPercent);
+        if (valueData.type === "mouseup") {
+            this.dispatchSeekEvent({
+                position: valueData.numerical
+            });
+        }
+        
+    
+    }
+    
+    addSeekListener(listener) {
+
+        this.seekListeners[listener] = listener;
+
+    }
+
+    dispatchSeekEvent(valueData) {
+
+        for (var listener in this.seekListeners) {
+            this.seekListeners[listener].call(this, valueData);
+        }
+
     }
 
 }
