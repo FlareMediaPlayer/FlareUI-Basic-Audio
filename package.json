@@ -4,6 +4,8 @@
     "keywords": ["util", "functional", "server", "client", "browser"],
     "author": "Brian Parra",
     "contributors": [],
-    "dependencies": {},
+    "dependencies": {
+        "flare-dom-elements" : "0.0.0"
+    },
     "main": "src/flare-ui-basic-audio-player.js"
 }
