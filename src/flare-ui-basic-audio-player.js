@@ -88,7 +88,8 @@ class FlareUI {
                 break;
             case 1:
                 //display loading state
-                //this.playerElements.playButton.setContent("&#9862;");
+                this.playerElements.playButtonInner.removeChildren();
+                this.playerElements.playButtonInner.addChild(this.playerElements.loadingIcon);
                 break;
             case 2:
                 //display play state
@@ -96,7 +97,7 @@ class FlareUI {
                 this.playerElements.playButtonInner.addChild(this.playerElements.pauseIcon);
                 break;
             default:
-            //display error on all others
+            //display error on all others for now
         }
 
     }
@@ -165,6 +166,7 @@ class BasicAudioPlayer extends FlareUI {
 
     }
 
+    
     initUI() {
 
         this.playerElements.container = new FlareDomElements.Basic("div", "container");
@@ -172,7 +174,8 @@ class BasicAudioPlayer extends FlareUI {
             'background-color': 'black',
             height: '40px',
             color: "white",
-            display: "block"
+            display: "block",
+            "font-family" : "arial"
         });
 
         this.playerElements.controls = new FlareDomElements.Basic("div", "controls");
@@ -207,6 +210,7 @@ class BasicAudioPlayer extends FlareUI {
         });
 
         this.playerElements.pauseIcon = new FlareDomElements.FlarePauseIcon();
+        this.playerElements.loadingIcon = new FlareDomElements.LoadingIcon();
  
         //this.playerElements.playButton.setContent("&#9658;");
 
@@ -358,6 +362,10 @@ class BasicAudioPlayer extends FlareUI {
             _this.handleTimelineSeek(valueData);
         });
     }
+    
+    setVolume(volume){
+        this.handleVolumeChanged({percent : volume});
+    }
 
     handleVolumeChanged(valueData) {
 
@@ -397,6 +405,10 @@ class BasicAudioPlayer extends FlareUI {
             this.seekListeners[listener].call(this, valueData);
         }
 
+    }
+    
+    updateLoadingAnimation(){
+        this.playerElements.loadingIcon.rotate(1);
     }
 
 }
